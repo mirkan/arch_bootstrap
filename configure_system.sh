@@ -9,9 +9,8 @@ USER=robin
 USER_PASSWD=robin
 HOSTNAME=archlinux
 TIMEZONE=Europe/Stockholm
-LOCALE=en_GB.UTF-8
 KEYMAP=sv-latin1
-LANG=en_GB
+LANG=en_GB.UTF-8
 ROOT_PASSWD=root
 ##Set Hostname
 echo "Setting up hostname"
@@ -22,11 +21,10 @@ echo "Setting locales and timezones"
 ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 
 # Locales
-sed -i 's/#$LANG/$LANG/' /etc/locale.gen
 echo KEYMAP=$KEYMAP > /etc/vconsole.conf
 echo LANG=$LANG > /etc/locale.conf
-echo LC_CTYPE=sv_SE.UTF-8 >> /etc/locale.conf
-echo LC_COLLATE=C >> /etc/locale.conf
+echo LC_ALL=$LANG > /etc/locale.conf
+sed -i 's/#$LANG/$LANG/' /etc/locale.gen
 locale-gen
 
 # Set root password
