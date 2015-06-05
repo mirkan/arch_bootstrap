@@ -6,12 +6,13 @@
 
 # System config
 USER=robin
+USER_PASSWD=robin
 HOSTNAME=archlinux
 TIMEZONE=Europe/Stockholm
 LOCALE=en_GB.UTF-8
 KEYMAP=sv-latin1
 LANG=en_GB
-
+ROOT_PASSWD=root
 ##Set Hostname
 echo "Setting up hostname"
 echo $HOSTNAME > /etc/hostname
@@ -30,10 +31,10 @@ locale-gen
 
 # Set root password
 echo "Setting root password"
-passwd
+echo root:$ROOT_PASSWD | chpasswd
 
 # Add user
 echo "Adding user $USER"
 useradd -m -G wheel -s /bin/zsh $USER
-passwd $USER
+echo $USER:$USER_PASSWD | chpasswd
 sed -i '/^# %wheel ALL=(ALL) NOPASSWD: ALL/{s@^#@@}' /etc/sudoers

@@ -1,26 +1,41 @@
 i3-wm
 # Tools/*{{{*/
+python
+python2
 bluez
 conky
 cronie
 dunst
 feh
+pavucontrol
 git
+rsync
+pm-utils
 htop
 mlocate
 mpd
 rxvt-unicode
+acpid
+udevil
 tmux
+curl
+scrot
 vim
 xbindkeys
 #/*}}}*/
 # System utils/*{{{*/
+alsa-utils
+pulseaudio
+pulseaudio-alsa
 dialog
 dnsutils
 grub
 lib32-mesa-libgl
 openssh
+unrar
+unzip
 os-prober
+wget
 wpa_supplicant
 xf86-input-synaptics
 xf86-video-intel
@@ -29,6 +44,7 @@ xorg-server-utils
 xorg-utils
 xorg-xinit
 zsh
+zsh-completions
 #/*}}}*/
 # Multimedia/*{{{*/
 mplayer

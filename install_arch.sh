@@ -5,8 +5,10 @@
 
 ## Author: Robin Björnsvik
 set -ex
+
 ## GLOBALS
 # Default mount
+user=robin
 MOUNT=/mnt
 REP="https://github.com/mirkan/dotfiles"
 # Packages
@@ -19,7 +21,7 @@ _arch-chroot() {
 
 ## SELECT MOUNT
 # Select which mountpoint to use
-_selectMount(){
+_select_mount(){
 	# Select mount where to run archbootstrap
 	echo -n "Select mountpoint(Default /mnt): "
 	read mountpoint
@@ -72,7 +74,6 @@ _base_install(){
 ## SYSTEM CONFIGURE
 # Setup the new system with arch-root
 _system_configure(){
-
     arch-chroot $MOUNT /bin/bash -s < configure_system.sh
     ## Setup GRUB bootloader
     #echo "Setting up GRUB bootloader"
@@ -96,31 +97,34 @@ _install_packages(){
 # Download and install AUR Packages with packer
 _install_aur_packages() {
     # Install AUR packages
-    echo "Installing yaourt"
-    _arch-chroot "wget https://aur.archlinux.org/packages/ya/yaourt/yaourt.tar.gz"
-    _arch-chroot "wget https://aur.archlinux.org/packages/ya/yaourt/PKGBUILD"
-    _arch-chroot "su - $USER -c 'makepkg -is --noconfirm PKGBUILD'"
-    _arch-chroot "rm PKGBUILD yaourt*.tar.cz"
+    echo "Installing packer"
 
+    # Download packer and install
+    _arch-chroot "wget --output-document=home/$user/PKGBUILD https://aur.archlinux.org/packages/pa/packer/PKGBUILD"
+    _arch-chroot "su - $user -c 'makepkg -is --noconfirm PKGBUILD'"
+    _arch-chroot "rm -r home/$user/{PKGBUILD,packer}"
+
+    # Install all AUR packages in 'packages_aur'
     echo "Installing AUR packages..."
-    _arch-chroot "yaourt $AUR_PACKAGES --noconfirm"
+    _arch-chroot "su - $user -c 'packer -S  \
+        $(sed '/^#/d' packages_aur | tr '\n' ' ') --noconfirm'"
 }
 
 _dotfiles(){
 
     # Get git rep
-    _arch-chroot "su - $USER -c "git clone $REP""
-    #_arch_chroot "su - $USER -c "sh home/$USER/dotfiles/install""
+    _arch-chroot "su - $user -c 'git clone $REP .dotfiles'"
+    _arch-chroot "su - $user -c 'sh .dotfiles/install'"
 }
 ## RUNTIME
 if [ "$(id -u)" != "0" ]; then
     echo "This script requires root." 1>&2
     exit 1
 fi
-_selectMount
-#_set_mirrors
+_select_mount
+_set_mirrors
 #_base_install
-#_system_configure
+_system_configure
 _install_packages
-#_install_aur_packages
-#_dotfiles
+_install_aur_packages
+_dotfiles
