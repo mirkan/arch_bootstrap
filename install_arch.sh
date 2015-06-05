@@ -4,14 +4,12 @@
 # Requires partion and mountpoint already setup
 
 ## Author: Robin Björnsvik
-
+set -ex
 ## GLOBALS
 # Default mount
 MOUNT=/mnt
-
+REP="https://github.com/mirkan/dotfiles"
 # Packages
-PACKAGES=$(cat packages)
-AUR_PACKAGES=$(cat packages_aur)
 MIRRORLIST="https://www.archlinux.org/mirrorlist/?country=SE&protocol=http&ip_version=4&use_mirror_status=on"
 
 #arch-chroot helper
@@ -90,7 +88,8 @@ _install_packages(){
     # Install packages
     echo "Installing packages...."
     _arch-chroot "pacman -Syy"
-    _arch-chroot "pacman -S $PACKAGES --noconfirm"
+    _arch-chroot "pacman -S --noconfirm \
+        $(sed '/^#/d' packages | tr '\n' ' ')"
 }
 
 # INSTALL AUR PACKAGES
@@ -100,21 +99,28 @@ _install_aur_packages() {
     echo "Installing yaourt"
     _arch-chroot "wget https://aur.archlinux.org/packages/ya/yaourt/yaourt.tar.gz"
     _arch-chroot "wget https://aur.archlinux.org/packages/ya/yaourt/PKGBUILD"
-    _arch-chroot "su - robin -c "makepkg -is --noconfirm PKGBUILD""
+    _arch-chroot "su - $USER -c 'makepkg -is --noconfirm PKGBUILD'"
     _arch-chroot "rm PKGBUILD yaourt*.tar.cz"
 
     echo "Installing AUR packages..."
     _arch-chroot "yaourt $AUR_PACKAGES --noconfirm"
 }
 
+_dotfiles(){
+
+    # Get git rep
+    _arch-chroot "su - $USER -c "git clone $REP""
+    #_arch_chroot "su - $USER -c "sh home/$USER/dotfiles/install""
+}
 ## RUNTIME
 if [ "$(id -u)" != "0" ]; then
     echo "This script requires root." 1>&2
     exit 1
 fi
 _selectMount
-_set_mirrors
+#_set_mirrors
 #_base_install
 #_system_configure
 _install_packages
-_install_aur_packages
+#_install_aur_packages
+#_dotfiles
