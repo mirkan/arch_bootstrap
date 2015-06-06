@@ -5,19 +5,17 @@
 
 ## Author: Robin Björnsvik
 set -ex
+source helpers.sh
 
 ## GLOBALS
 # Default mount
 user=robin
-MOUNT=/mnt
-REP="https://github.com/mirkan/dotfiles"
-# Packages
-MIRRORLIST="https://www.archlinux.org/mirrorlist/?country=SE&protocol=http&ip_version=4&use_mirror_status=on"
+mount=/mnt
+dotfiles_rep="https://github.com/mirkan/dotfiles"
+scripts_rep="https://github.com/mirkan/bash_scripts"
 
-#arch-chroot helper
-_arch-chroot() {
-  arch-chroot $MOUNT /bin/bash -c "${1}"
-}
+# Packages
+mirrors="https://www.archlinux.org/mirrorlist/?country=SE&protocol=http&ip_version=4&use_mirror_status=on"
 
 ## SELECT MOUNT
 # Select which mountpoint to use
@@ -26,13 +24,13 @@ _select_mount(){
 	echo -n "Select mountpoint(Default /mnt): "
 	read mountpoint
 
-	# Default to $MOUNT if empty
-	[ $mountpoint ] && MOUNT=$mountpoint
+	# Default to $mount if empty
+	[ $mountpoint ] && mount=$mountpoint
 
 	#Check if mountpoint as valid
-	mounted=$(mountpoint -q $MOUNT && echo $?)
+	mounted=$(mountpoint -q $mount && echo $?)
     if [ ! $mounted ];then
-		echo "$MOUNT doesn't seem to be mounted" 1>&2
+		echo "$mount doesn't seem to be mounted" 1>&2
         exit 1
 	fi
 }
@@ -42,13 +40,13 @@ _set_mirrors(){
     # Download and select mirrors
     echo "Generating mirrorlist"
     tmpfile=$(mktemp --suffix=-mirrorlist)
-    curl -so ${tmpfile} ${MIRRORLIST}
-    sed -i 's/^#Server/Server/g' ${tmpfile}
+    curl -so $tmpfile $mirrors
+    sed -i 's/^#Server/Server/g' $tmpfile
 
     mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig
-    mv ${tmpfile} /etc/pacman.d/mirrorlist
+    mv $tmpfile /etc/pacman.d/mirrorlist
 
-    # Rankmirrors to make this faster (though it takes a while)
+    # Rankmirrors to make this faster
     cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
     rankmirrors -n 3 /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
     rm /etc/pacman.d/mirrorlist.tmp
@@ -62,19 +60,20 @@ _set_mirrors(){
 _base_install(){
     # Run pacstrap
     echo "Running pacstrap install"
-    pacstrap $MOUNT base base-devel
+    pacstrap $mount base base-devel
 
     # Generate fstab
-    genfstab -p $MOUNT >> $MOUNT/etc/fstab
+    genfstab -p $mount >> $mount/etc/fstab
 
     # Copy the mirrorlist to the new system
-    cp /etc/pacman.d/mirrorlist* $MOUNT/etc/pacman.d
+    cp /etc/pacman.d/mirrorlist* $mount/etc/pacman.d
 }
 
 ## SYSTEM CONFIGURE
 # Setup the new system with arch-root
 _system_configure(){
-    arch-chroot $MOUNT /bin/bash -s < configure_system.sh
+    echo "Configuring system"
+    arch-chroot $mount /bin/bash -s < configure_system.sh
     ## Setup GRUB bootloader
     #echo "Setting up GRUB bootloader"
     #sudo grub-mkconfig -o /boot/grub/grub.cfg
@@ -90,7 +89,7 @@ _install_packages(){
     echo "Installing packages...."
     _arch-chroot "pacman -Syy"
     _arch-chroot "pacman -S --noconfirm \
-        $(sed '/^#/d' packages | tr '\n' ' ')"
+        $(sed '/^#/d' packages | tr '\n' ' ')"              # Avoid lines with comments and remove newlines
 }
 
 # INSTALL AUR PACKAGES
@@ -98,23 +97,28 @@ _install_packages(){
 _install_aur_packages() {
     # Install AUR packages
     echo "Installing packer"
-
-    # Download packer and install
-    _arch-chroot "wget --output-document=home/$user/PKGBUILD https://aur.archlinux.org/packages/pa/packer/PKGBUILD"
-    _arch-chroot "su - $user -c 'makepkg -is --noconfirm PKGBUILD'"
-    _arch-chroot "rm -r home/$user/{PKGBUILD,packer}"
+    # Download packer, build and install
+    _user-chroot $user "wget https://aur.archlinux.org/packages/pa/packer/PKGBUILD"
+    _user-chroot $user "makepkg -is --noconfirm PKGBUILD"
+    _user-chroot $user "rm -rf PKGBUILD pkg src packer*"
 
     # Install all AUR packages in 'packages_aur'
     echo "Installing AUR packages..."
-    _arch-chroot "su - $user -c 'packer -S  \
-        $(sed '/^#/d' packages_aur | tr '\n' ' ') --noconfirm'"
+    _user-chroot $user "packer -S  \
+        $(sed '/^#/d' packages_aur | tr '\n' ' ') --noconfirm"
 }
 
 _dotfiles(){
+    # Get git rep for dotfiles and scripts
+    echo "Downloading dotfiles"
+    _user-chroot $user "git clone $dotfiles_rep .dotfiles"
+    _user-chroot $user "sh .dotfiles/install"
+}
 
-    # Get git rep
-    _arch-chroot "su - $user -c 'git clone $REP .dotfiles'"
-    _arch-chroot "su - $user -c 'sh .dotfiles/install'"
+_bash_scripts(){
+    # Downloads bash-scripts repo
+    echo "Downloading bash-scripts"
+    _user-chroot $user "git clone $scripts_rep .bin"
 }
 ## RUNTIME
 if [ "$(id -u)" != "0" ]; then
@@ -122,9 +126,10 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 _select_mount
-_set_mirrors
+#_set_mirrors
 #_base_install
-_system_configure
-_install_packages
+#_system_configure
+#_install_packages
 _install_aur_packages
 _dotfiles
+_bash_scripts

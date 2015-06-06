@@ -1,25 +1,25 @@
 i3-wm
 # Tools/*{{{*/
-python
-python2
+acpid
 bluez
 conky
 cronie
+curl
 dunst
 feh
-pavucontrol
 git
-rsync
-pm-utils
 htop
 mlocate
 mpd
+pavucontrol
+pm-utils
+python
+python2
+rsync
 rxvt-unicode
-acpid
-udevil
-tmux
-curl
 scrot
+tmux
+udevil
 vim
 xbindkeys
 #/*}}}*/
@@ -31,6 +31,7 @@ dialog
 dnsutils
 grub
 lib32-mesa-libgl
+libva-intel-driver
 openssh
 unrar
 unzip
@@ -45,8 +46,21 @@ xorg-utils
 xorg-xinit
 zsh
 zsh-completions
+iw
+wireless_tools
+wpa_actiond
 #/*}}}*/
 # Multimedia/*{{{*/
 mplayer
 firefox
+gst-libav
+gst-plugins-good
+#/*}}}*/
+# Fonts/*{{{*/
+ttf-dejavu
+ttf-inconsolata
+ttf-freefont
+#/*}}}*/
+# Misc/*{{{*/
+unclutter
 #/*}}}*/
