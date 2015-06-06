@@ -5,12 +5,22 @@
 
 ## Author: Robin Björnsvik
 set -ex
-source helpers.sh
+source bin/helpers.sh
+source bin/config
+
+export HOSTNAME
+export USER
+export USER_PASSWD
+export ROOT_PASSWD
+export TIMEZONE
+export KEYMAP
+export LOCALE
+export SHELL
 
 ## GLOBALS
 # Default mount
-user=robin
 mount=/mnt
+# Settings
 dotfiles_rep="https://github.com/mirkan/dotfiles"
 scripts_rep="https://github.com/mirkan/bash_scripts"
 
@@ -73,7 +83,7 @@ _base_install(){
 # Setup the new system with arch-root
 _system_configure(){
     echo "Configuring system"
-    arch-chroot $mount /bin/bash -s < configure_system.sh
+    arch-chroot $mount /bin/bash -s < bin/configure_system.sh
     ## Setup GRUB bootloader
     #echo "Setting up GRUB bootloader"
     #sudo grub-mkconfig -o /boot/grub/grub.cfg
@@ -98,27 +108,27 @@ _install_aur_packages() {
     # Install AUR packages
     echo "Installing packer"
     # Download packer, build and install
-    _user-chroot $user "wget https://aur.archlinux.org/packages/pa/packer/PKGBUILD"
-    _user-chroot $user "makepkg -is --noconfirm PKGBUILD"
-    _user-chroot $user "rm -rf PKGBUILD pkg src packer*"
+    _user-chroot $USER "wget https://aur.archlinux.org/packages/pa/packer/PKGBUILD"
+    _user-chroot $USER "makepkg -is --noconfirm PKGBUILD"
+    _user-chroot $USER "rm -rf PKGBUILD pkg src packer*"
 
     # Install all AUR packages in 'packages_aur'
     echo "Installing AUR packages..."
-    _user-chroot $user "packer -S  \
+    _user-chroot $USER "packer -S  \
         $(sed '/^#/d' packages_aur | tr '\n' ' ') --noconfirm"
 }
 
 _dotfiles(){
     # Get git rep for dotfiles and scripts
     echo "Downloading dotfiles"
-    _user-chroot $user "git clone $dotfiles_rep .dotfiles"
-    _user-chroot $user "sh .dotfiles/install"
+    _user-chroot $USER "git clone $dotfiles_rep .dotfiles"
+    _user-chroot $USER "sh .dotfiles/install"
 }
 
 _bash_scripts(){
     # Downloads bash-scripts repo
     echo "Downloading bash-scripts"
-    _user-chroot $user "git clone $scripts_rep .bin"
+    _user-chroot $USER "git clone $scripts_rep .bin"
 }
 ## RUNTIME
 if [ "$(id -u)" != "0" ]; then
@@ -126,10 +136,10 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 _select_mount
-#_set_mirrors
-#_base_install
-#_system_configure
-#_install_packages
+_set_mirrors
+_base_install
+_system_configure
+_install_packages
 _install_aur_packages
 _dotfiles
 _bash_scripts
