@@ -44,4 +44,4 @@ mount /dev/sdb1 home
 ```
 
 ### Install
-Simply enter the values in `config` and your desired packages in `packages` and `packages_aur`.
+Simply fill up the `config` and the desired packages in `packages` and `packages_aur`. When everything is set, run the `install`.
