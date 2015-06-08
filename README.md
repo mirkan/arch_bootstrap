@@ -1,7 +1,7 @@
 # arch_bootstrap
-My version of a simplified and automatic archlinux setup. Package installation and file-configuration has been a priority as I find it the most tedious and timeconsuming part of a new OS installation. So therefore I've left out the partioning and the formatting part of the script.
+My version of a simplified and automatic archlinux setup. Package installation and file-configuration has been a priority as I find it the most tedious and timeconsuming part of a new OS installation. So therefore I've left out the partioning and the formatting part of the script. EFI is set as the bootloader.
 ###Pre-bootstrap
-The following needs to be configured before running the script:
+The following needs to be configured before running the script
 * Partioning
 * Format
 * Mount
