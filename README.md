@@ -1,11 +1,12 @@
 # arch_bootstrap
-####Pre-bootstrap
+My version of a simplified and automatic archlinux setup. Package installation and file-configuration has been a priority as I find it the most tedious and timeconsuming part of a new OS installation. So therefore I've left out the partioning and the formatting part of the script.
+###Pre-bootstrap
 The following needs to be configured before running the script:
 * Partioning
 * Format
 * Mount
 
-###Partioning
+####Partioning
 In this example, I'm using 4 partitions: root, boot, swap and home. The home partition will be on a separate disk while the other three are on the same drive.
 #####Erase everything first (if required):
 `sgdisk -Z /dev/sda`
@@ -25,7 +26,7 @@ In this example, I'm using 4 partitions: root, boot, swap and home. The home par
 *Change partition nr2 to type swap*:      
 `sgdisk -t 2:8200 /dev/sda`
 
-###Format
+####Format
 ```
 mkfs.vfat -F32 /dev/sda1
 mkfs.ext4 /dev/sda3
@@ -34,7 +35,7 @@ mkswap /dev/sda2
 swapon /dev/sda2
 ```
 
-###Mount
+####Mount
 ```
 mount /dev/sda3 /mnt
 mkdir /mnt/{boot,home}
@@ -42,3 +43,5 @@ mount /dev/sda1 boot
 mount /dev/sdb1 home
 ```
 
+### Install
+Simply enter the values in `config` and your desired packages in `packages` and `packages_aur`.
