@@ -6,7 +6,7 @@
 ## Author: Robin Björnsvik
 set -ex
 source bin/helpers.sh
-source bin/config
+source config
 
 export HOSTNAME
 export USER
@@ -20,6 +20,7 @@ export SHELL
 ## GLOBALS
 # Default mount
 mount=/mnt
+
 # Settings
 dotfiles_rep="https://github.com/mirkan/dotfiles"
 scripts_rep="https://github.com/mirkan/bash_scripts"
@@ -123,6 +124,9 @@ _dotfiles(){
     echo "Downloading dotfiles"
     _user-chroot $USER "git clone $dotfiles_rep .dotfiles"
     _user-chroot $USER "sh .dotfiles/install"
+
+    # Compile vim-plugin: youcompleteme
+    _user-chroot $USER "sh .dotfiles/vim/bundle/vim-youcompleteme/install.sh"
 }
 
 _bash_scripts(){
@@ -136,9 +140,9 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 _select_mount
-_set_mirrors
-_base_install
-_system_configure
+#_set_mirrors
+#_base_install
+#_system_configure
 _install_packages
 _install_aur_packages
 _dotfiles

@@ -2,6 +2,7 @@ i3-wm
 # Tools/*{{{*/
 acpid
 bluez
+cmake
 conky
 cronie
 curl
@@ -20,7 +21,7 @@ rxvt-unicode
 scrot
 tmux
 udevil
-vim
+gvim
 xbindkeys
 #/*}}}*/
 # System utils/*{{{*/
@@ -56,11 +57,13 @@ firefox
 gst-libav
 gst-plugins-good
 #/*}}}*/
-# Fonts/*{{{*/
+#Fonts/*{{{*/
 ttf-dejavu
 ttf-inconsolata
 ttf-freefont
+gsfonts
 #/*}}}*/
 # Misc/*{{{*/
 unclutter
+gtk-engine-aurora
 #/*}}}*/
