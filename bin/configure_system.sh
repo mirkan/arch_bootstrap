@@ -21,12 +21,12 @@ hwclock --systohc --utc
 
 # Set root password
 echo "Setting root password"
-echo root:$ROOT_PASSWD | chpasswd
+echo root:$PASSWORD | chpasswd
 
 # Add user
 echo "Adding user $USER"
 useradd -m -G wheel -s $SHELL $USER
-echo $USER:$USER_PASSWD | chpasswd
+echo $USER:$PASSWORD | chpasswd
 
 # Allow user sudo rights
 sed -i '/^# %wheel ALL=(ALL) NOPASSWD: ALL/{s@^#@@}' /etc/sudoers

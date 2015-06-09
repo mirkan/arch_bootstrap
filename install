@@ -10,20 +10,11 @@ source config
 
 export HOSTNAME
 export USER
-export USER_PASSWD
-export ROOT_PASSWD
+export PASSWORD
 export TIMEZONE
 export KEYMAP
 export LOCALE
 export SHELL
-
-## GLOBALS
-# Default mount
-mount=/mnt
-
-# Settings
-dotfiles_rep="https://github.com/mirkan/dotfiles"
-scripts_rep="https://github.com/mirkan/bash_scripts"
 
 # Packages
 mirrors="https://www.archlinux.org/mirrorlist/?country=SE&protocol=http&ip_version=4&use_mirror_status=on"
@@ -33,17 +24,25 @@ mirrors="https://www.archlinux.org/mirrorlist/?country=SE&protocol=http&ip_versi
 _select_mount(){
 	# Select mount where to run archbootstrap
 	echo -n "Select mountpoint(Default /mnt): "
-	read mountpoint
+	read mount
 
-	# Default to $mount if empty
-	[ $mountpoint ] && mount=$mountpoint
+	# Default to /mnt if empty
+	[ -z $mount ] && mount=/mnt
 
-	#Check if mountpoint as valid
-	mounted=$(mountpoint -q $mount && echo $?)
-    if [ ! $mounted ];then
+	# Check if $mount is mounted
+    if ! ( mountpoint -q $mount ); then
 		echo "$mount doesn't seem to be mounted" 1>&2
         exit 1
 	fi
+}
+_select_password(){
+    echo "Select a password for $USER and 'root':"
+    read PASSWORD
+    if [ -z $PASSWORD ]; then
+        echo "Need a password"
+        exit 1
+    fi
+
 }
 ## SET MIRRORS
 # Generate mirrorlist for pacman before install
@@ -88,6 +87,17 @@ _system_configure(){
     ## Setup GRUB bootloader
     #echo "Setting up GRUB bootloader"
     #sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+    # Gummiboot
+    _arch-chroot "pacman -S gummiboot --noconfirm"
+    _arch-chroot "gummiboot install --path=/boot"
+
+    cat <<EOF > $mount/efi/loader/entries/arch.conf
+        title Arch Linux
+        linux /vmlinuz-linux
+        initrd /initramfs-linux.img
+        options root=PARTUUID=$(blkid -s PARTUUID -o value $ROOT_PARTITION)
+EOF
 }
 
 ## INSTALL PACKAGES
@@ -103,7 +113,7 @@ _install_packages(){
         $(sed '/^#/d' packages | tr '\n' ' ')"              # Avoid lines with comments and remove newlines
 }
 
-# INSTALL AUR PACKAGES
+## INSTALL AUR PACKAGES
 # Download and install AUR Packages with packer
 _install_aur_packages() {
     # Install AUR packages
@@ -122,7 +132,7 @@ _install_aur_packages() {
 _dotfiles(){
     # Get git rep for dotfiles and scripts
     echo "Downloading dotfiles"
-    _user-chroot $USER "git clone $dotfiles_rep .dotfiles"
+    _user-chroot $USER "git clone $DOTFILES_REP .dotfiles"
     _user-chroot $USER "sh .dotfiles/install"
 
     # Compile vim-plugin: youcompleteme
@@ -132,7 +142,7 @@ _dotfiles(){
 _bash_scripts(){
     # Downloads bash-scripts repo
     echo "Downloading bash-scripts"
-    _user-chroot $USER "git clone $scripts_rep .bin"
+    _user-chroot $USER "git clone $SCRIPTS_REP .bin"
 }
 ## RUNTIME
 if [ "$(id -u)" != "0" ]; then
@@ -140,9 +150,10 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 _select_mount
-#_set_mirrors
-#_base_install
-#_system_configure
+_select_password
+_set_mirrors
+_base_install
+_system_configure
 _install_packages
 _install_aur_packages
 _dotfiles
