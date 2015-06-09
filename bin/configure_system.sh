@@ -25,7 +25,7 @@ echo root:$PASSWORD | chpasswd
 
 # Add user
 echo "Adding user $USER"
-useradd -m -G wheel -s $SHELL $USER
+useradd -m -g users -G wheel -s $SHELL $USER
 echo $USER:$PASSWORD | chpasswd
 
 # Allow user sudo rights

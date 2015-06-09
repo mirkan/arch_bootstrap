@@ -84,9 +84,6 @@ _base_install(){
 _system_configure(){
     echo "Configuring system"
     arch-chroot $mount /bin/bash -s < bin/configure_system.sh
-    ## Setup GRUB bootloader
-    #echo "Setting up GRUB bootloader"
-    #sudo grub-mkconfig -o /boot/grub/grub.cfg
 
     # Gummiboot
     _arch-chroot "pacman -S gummiboot --noconfirm"
