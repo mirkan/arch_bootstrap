@@ -1,12 +1,12 @@
 # arch_bootstrap
-My version of a simplified and automatic archlinux setup. Package installation and file-configuration has been a priority as I find it the most tedious and timeconsuming part of a new OS installation. So therefore I've left out the partioning and the formatting part of the script. EFI is set as the bootloader.
+My version of a simplified and automatic archlinux setup. Package installation and file-configuration has been a priority as I find it the most tedious and timeconsuming part of a new OS installation. So therefore I've left out the partitioning and the formatting part of the script. EFI is set as the bootloader.
 ###Pre-bootstrap
 The following needs to be configured before running the script
 * Partioning
 * Format
 * Mount
 
-####Partioning
+####Partitioning
 In this example, I'm using 4 partitions: root, boot, swap and home. The home partition will be on a separate disk while the other three are on the same drive.
 #####Erase everything first (if required):
 `sgdisk -Z /dev/sda`
