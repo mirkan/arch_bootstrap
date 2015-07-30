@@ -27,6 +27,7 @@ echo root:$PASSWORD | chpasswd
 echo "Adding user $USER"
 useradd -m -g users -G wheel -s $SHELL $USER
 echo $USER:$PASSWORD | chpasswd
+mkdir -p /home/$USER/{downloads,documents,music,pics,videos,projects}
 
 # Allow user sudo rights
 sed -i '/^# %wheel ALL=(ALL) NOPASSWD: ALL/{s@^#@@}' /etc/sudoers
