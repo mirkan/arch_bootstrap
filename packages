@@ -6,6 +6,7 @@ cmake
 conky
 cronie
 curl
+dosfstools
 dunst
 feh
 git
@@ -52,6 +53,7 @@ xorg-utils
 xorg-xinit
 zsh
 zsh-completions
+zsh-syntax-highlighting
 #/*}}}*/
 # Multimedia/*{{{*/
 mplayer
